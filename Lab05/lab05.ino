@@ -5,8 +5,10 @@ const int LED_VERDE = 4;
 const int BOTAO = 7; // Pino onde o botão está conectado
 
 // Define os tempos de espera em milissegundos
-const unsigned long TEMPO_VERDE_PADRAO = 2000; // Tempo padrão para o LED verde
-const unsigned long TEMPO_VERDE_AUMENTADO = 5000; // Tempo aumentado para o LED verde
+const unsigned long TEMPO_VERDE = 2000; // Tempo para o LED verde
+const unsigned long TEMPO_AMARELO = 2000; // Tempo para o LED amarelo
+const unsigned long TEMPO_VERMELHO = 2000; // Tempo para o LED vermelho
+const unsigned long TEMPO_VERMELHO_BOTAO = 5000; // Tempo para o LED vermelho quando o botão é pressionado
 
 void setup() {
   // Define os pinos dos LEDs como saídas
@@ -25,35 +27,35 @@ void loop() {
   // Verifica se o botão está pressionado
   bool botaoPressionado = digitalRead(BOTAO) == LOW; // Botão pressionado lê LOW devido ao resistor pull-up
 
-  // Imprime mensagem no Serial Monitor se o botão estiver pressionado
   if (botaoPressionado) {
+    // Imprime mensagem no Serial Monitor se o botão estiver pressionado
     Serial.println("Botão pressionado!");
+    
+    // Mantém o semáforo no vermelho por TEMPO_VERMELHO_BOTAO e depois volta ao loop normal
+    digitalWrite(LED_VERMELHO, HIGH);
+    digitalWrite(LED_AMARELO, LOW);
+    digitalWrite(LED_VERDE, LOW);
+    delay(TEMPO_VERMELHO_BOTAO); // Espera pelo tempo do botão
+
+    // Retorna à sequência normal após o tempo de botão
+    digitalWrite(LED_VERMELHO, LOW);
+    delay(500); // Pequeno intervalo para garantir que o botão não mantenha o semáforo no vermelho por muito tempo
   }
 
-  // Determina o tempo de espera com base no estado do botão
-  unsigned long tempoVerde = botaoPressionado ? TEMPO_VERDE_AUMENTADO : TEMPO_VERDE_PADRAO;
-
+  // Sequência normal do semáforo
   // Acende o LED verde e apaga os outros
   digitalWrite(LED_VERMELHO, LOW);
   digitalWrite(LED_AMARELO, LOW);
   digitalWrite(LED_VERDE, HIGH);
-  delay(tempoVerde); // Espera pelo tempo verde definido
-
-  // Acende o LED vermelho e apaga os outros
-  digitalWrite(LED_VERMELHO, HIGH);
-  digitalWrite(LED_AMARELO, LOW);
-  digitalWrite(LED_VERDE, LOW);
-  delay(2000); // Espera por 2 segundos
+  delay(TEMPO_VERDE); // Espera pelo tempo verde definido
 
   // Acende o LED amarelo e apaga os outros
-  digitalWrite(LED_VERMELHO, LOW);
-  digitalWrite(LED_AMARELO, HIGH);
   digitalWrite(LED_VERDE, LOW);
-  delay(2000); // Espera por 2 segundos
+  digitalWrite(LED_AMARELO, HIGH);
+  delay(TEMPO_AMARELO); // Espera pelo tempo amarelo definido
 
-  // Retorna ao LED verde
-  digitalWrite(LED_VERMELHO, LOW);
+  // Acende o LED vermelho e apaga os outros
   digitalWrite(LED_AMARELO, LOW);
-  digitalWrite(LED_VERDE, HIGH);
-  delay(tempoVerde); // Espera pelo tempo verde definido
+  digitalWrite(LED_VERMELHO, HIGH);
+  delay(TEMPO_VERMELHO); // Espera pelo tempo vermelho definido
 }
