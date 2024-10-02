@@ -1,41 +1,88 @@
-#include <Wire.h> // Biblioteca para I2C
-#include <LiquidCrystal_I2C.h> // Biblioteca para LCD I2C
+// Biblioteca para o display LCD:
+#include <LiquidCrystal.h>
 
-LiquidCrystal_I2C lcd1(0x27, 16, 2); // Primeiro LCD
-LiquidCrystal_I2C lcd2(0x3F, 16, 2); // Segundo LCD (verifique o endereço)
+int ledPin = 11;               
+int PIRpin = 8;            
+int pirState = LOW;            
+int val = 0;
 
-const int pirPin = 2;   // Pino do sensor PIR
-const int ledPin = 13;  // Pino do LED
 
-void setup() {
-  pinMode(pirPin, INPUT);
-  pinMode(ledPin, OUTPUT);
+int photocellPin = A0;     
+int photocellReading;             
+
+//Definimos os pinos do nosso Arduino que utilizaremos para conectar ao display LCD
+LiquidCrystal lcd(2, 3, 4, 5, 6, 7);                        
+
+void setup() {  
+
+  pinMode(ledPin, OUTPUT);       
+  pinMode(PIRpin, INPUT);     
+  pinMode(photocellPin, INPUT);
+  
   Serial.begin(9600);
+  lcd.begin(16, 2); 
+  
+  lcd.setCursor(2, 0);                   	
 
-  lcd1.init();
-  lcd1.backlight();
-  lcd2.init();
-  lcd2.backlight();
+  lcd.print("Tony Hara");               
+  
+  lcd.setCursor(0, 1);
+  
+  lcd.print("PIR + LED + LCD");           
+  
+  delay(2000); 
+  
+  lcd.clear();
+  
+  lcd.setCursor(0, 0);
+  
+  lcd.print("Processando !!!");
+  delay(3000);
+  lcd.clear();	
+  
 }
 
-void loop() {
-  int pirState = digitalRead(pirPin);
+void loop(){
+  val = digitalRead(PIRpin);  
+  photocellReading = analogRead(photocellPin);
 
-  if (pirState == HIGH) {
-    Serial.println("Presença detectada!");
-    digitalWrite(ledPin, HIGH);
-    
-    lcd1.clear();
-    lcd1.print("Presença detectada!");
-    lcd2.clear();
-    lcd2.print("Alerta ativado!");
+  if (val == HIGH) {            
+    digitalWrite(ledPin, HIGH); 
+    delay(150);
 
-    delay(500);
-    digitalWrite(ledPin, LOW);
-    delay(500);
+		if (pirState == LOW) {
+		  lcd.clear() ;
+		  lcd.setCursor(0, 0);                 
+		  lcd.print("Detectado !");   
+		  lcd.setCursor(0, 1);                 
+		  lcd.print("Existe Movimento"); 		  
+		  pirState = HIGH;
+          delay(5000) ;
+		}
   } else {
-    digitalWrite(ledPin, LOW);
-    lcd1.clear();
-    lcd2.clear();
+      digitalWrite(ledPin, LOW); 
+	 
+	  scrollScreenSaver() ;
+      if (pirState == HIGH){
+		
+		  pirState = LOW;
+      }
   }
+}
+
+void scrollScreenSaver() {
+	
+	lcd.clear() ;
+  	lcd.setCursor(15, 0);                 
+	lcd.print("Nao foi detectado");   
+	lcd.setCursor(15, 1); 
+    lcd.print("nenhum Movimento !");	
+	
+    for (int positionCounter = 0; positionCounter < 22; positionCounter++) {
+		
+		lcd.scrollDisplayLeft();
+		
+		delay(150);
+    
+	}
 }
